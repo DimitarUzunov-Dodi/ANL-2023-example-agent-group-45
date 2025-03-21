@@ -22,7 +22,7 @@ settings = {
             "parameters": {"storage_dir": "agent_storage/DreamTeam109Agent"},
         },
         {
-            "class": "agents.template_agent.template_agent.TemplateAgent",
+            "class": "agents.agent_k9.agent_k9.k9Agent",
             "parameters": {"storage_dir": "agent_storage/TemplateAgent"},
         },
     ],
