@@ -195,7 +195,6 @@ class k9Agent(DefaultParty):
         progress = self.progress.get(time() * 1000)
 
         # if it is a good deal we can accept
-        # TODO check this
         if self.profile.getUtility(bid) > 0.9:
             return True
 
