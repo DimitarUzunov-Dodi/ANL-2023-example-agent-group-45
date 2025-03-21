@@ -194,6 +194,11 @@ class k9Agent(DefaultParty):
         # progress of the negotiation session between 0 and 1 (1 is deadline)
         progress = self.progress.get(time() * 1000)
 
+        # if it is a good deal we can accept
+        # TODO check this
+        if self.profile.getUtility(bid) > 0.9:
+            return True
+
         # very basic approach that accepts if the offer is valued above 0.7 and
         # 95% of the time towards the deadline has passed
         conditions = [
@@ -207,17 +212,46 @@ class k9Agent(DefaultParty):
         domain = self.profile.getDomain()
         all_bids = AllBidsList(domain)
 
-        best_bid_score = 0.0
-        best_bid = None
+        # progress of the negotiation session between 0 and 1 (1 is deadline)
+        progress = self.progress.get(time() * 1000)
 
-        # take 500 attempts to find a bid according to a heuristic score
-        for _ in range(500):
-            bid = all_bids.get(randint(0, all_bids.size() - 1))
-            bid_score = self.score_bid(bid)
-            if bid_score > best_bid_score:
-                best_bid_score, best_bid = bid_score, bid
+        # first have of the game we are going to just think about what we want
+        if progress < 0.5:
+            best_bid_score = 0.0
+            best_bid = None
 
-        return best_bid
+            # take 500 attempts to find a bid according to a heuristic score
+            for _ in range(500):
+                bid = all_bids.get(randint(0, all_bids.size() - 1))
+                bid_score = self.score_bid(bid)
+                if bid_score > best_bid_score:
+                    best_bid_score, best_bid = bid_score, bid
+            return best_bid
+        else:
+            # We are going to look at what the other agent wants
+            best_opponent_score = 0.0
+            best_bid = None
+
+            for _ in range(10000):
+                bid = all_bids.get(randint(0, all_bids.size() - 1)) # get random bid
+                bid_score = self.score_bid(bid) # our score
+
+                opponent_score = 0
+                if self.opponent_model is not None:
+                    opponent_score = self.opponent_model.get_predicted_utility(bid) # what we think they will get
+
+
+                # safety factor
+                if bid_score - opponent_score > 0.01:
+                    if opponent_score > best_opponent_score:
+                        best_opponent_score = opponent_score
+                        best_bid = bid
+
+            return best_bid
+
+
+
+
 
     def score_bid(self, bid: Bid, alpha: float = 0.95, eps: float = 0.1) -> float:
         """Calculate heuristic score for a bid
