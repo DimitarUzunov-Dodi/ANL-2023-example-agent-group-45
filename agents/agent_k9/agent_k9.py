@@ -234,19 +234,23 @@ class k9Agent(DefaultParty):
             return best_bid
         else:
             # We are going to look at what the other agent wants
-            best_opponent_score = 0.0
+            best_opponent_score = -1
             best_bid = None
 
             for _ in range(1000):
                 bid = all_bids.get(randint(0, all_bids.size() - 1))  # get random bid
                 bid_score = self.score_bid(bid)  # our score
 
+
+                if best_bid is None: # always have a default
+                    best_bid = bid
+
                 opponent_score = 0
                 if self.opponent_model is not None:
                     opponent_score = self.opponent_model.get_predicted_utility(bid)  # what we think they will get
 
                 # safety factor
-                if bid_score - opponent_score > 0.01:
+                if bid_score - opponent_score > 0.05:
                     if opponent_score > best_opponent_score:
                         best_opponent_score = opponent_score
                         best_bid = bid
