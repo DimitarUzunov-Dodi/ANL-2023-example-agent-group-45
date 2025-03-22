@@ -78,9 +78,9 @@ tournament_settings = {
         # {
         #     "class": "agents.CSE3210.agent29.agent29.Agent29",
         # },
-        # {
-        #     "class": "agents.CSE3210.agent32.agent32.Agent32",
-        # },
+        {
+            "class": "agents.CSE3210.agent32.agent32.Agent32",
+        },
         # {
         #     "class": "agents.CSE3210.agent33.agent33.Agent33",
         # },

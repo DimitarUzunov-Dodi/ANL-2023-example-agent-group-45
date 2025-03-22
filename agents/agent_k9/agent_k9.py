@@ -137,7 +137,7 @@ class k9Agent(DefaultParty):
         Returns:
             str: Agent description
         """
-        return "The k9 agent for getting the best deal at the lowest prizes!"
+        return "The k9 agent for getting the best deal at the lowest prizes! - team 45"
 
     def opponent_action(self, action):
         """Process an action that was received from the opponent.
@@ -183,11 +183,11 @@ class k9Agent(DefaultParty):
         with open(f"{self.storage_dir}/data.md", "w") as f:
             f.write(data)
 
-    ###########################################################################################
-    ################################## Example methods below ##################################
-    ###########################################################################################
-
     def accept_condition(self, bid: Bid) -> bool:
+        good_deal = 0.9  # any bid above this value should be taken
+        lowest_accept = 0.6  # never accept anything be low this
+        lowering_of_standards_point = 0.9 # when do we allow the time pressure to start to affect our choice
+
         if bid is None:
             return False
 
@@ -195,16 +195,22 @@ class k9Agent(DefaultParty):
         progress = self.progress.get(time() * 1000)
 
         # if it is a good deal we can accept
-        if self.profile.getUtility(bid) > 0.9:
+        if self.profile.getUtility(bid) > good_deal:
             return True
 
-        # very basic approach that accepts if the offer is valued above 0.7 and
-        # 95% of the time towards the deadline has passed
-        conditions = [
-            self.profile.getUtility(bid) > 0.8,
-            progress > 0.95,
-        ]
-        return all(conditions)
+        # if we are almost at the end we lower our standards
+        if progress >= lowering_of_standards_point:
+            rate = (lowest_accept - good_deal) / (1 - lowering_of_standards_point)
+            b = good_deal - rate * lowering_of_standards_point
+
+            goal = rate * progress + b
+
+            # print("I will now settle for :", goal)
+
+            if self.profile.getUtility(bid) > goal:
+                return True
+
+        return False
 
     def find_bid(self) -> Bid:
         # compose a list of all possible bids
@@ -231,14 +237,13 @@ class k9Agent(DefaultParty):
             best_opponent_score = 0.0
             best_bid = None
 
-            for _ in range(10000):
-                bid = all_bids.get(randint(0, all_bids.size() - 1)) # get random bid
-                bid_score = self.score_bid(bid) # our score
+            for _ in range(1000):
+                bid = all_bids.get(randint(0, all_bids.size() - 1))  # get random bid
+                bid_score = self.score_bid(bid)  # our score
 
                 opponent_score = 0
                 if self.opponent_model is not None:
-                    opponent_score = self.opponent_model.get_predicted_utility(bid) # what we think they will get
-
+                    opponent_score = self.opponent_model.get_predicted_utility(bid)  # what we think they will get
 
                 # safety factor
                 if bid_score - opponent_score > 0.01:
@@ -247,10 +252,6 @@ class k9Agent(DefaultParty):
                         best_bid = bid
 
             return best_bid
-
-
-
-
 
     def score_bid(self, bid: Bid, alpha: float = 0.95, eps: float = 0.1) -> float:
         """Calculate heuristic score for a bid
