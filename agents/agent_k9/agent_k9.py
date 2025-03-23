@@ -185,7 +185,7 @@ class k9Agent(DefaultParty):
 
     def accept_condition(self, bid: Bid) -> bool:
         good_deal = 0.9  # any bid above this value should be taken
-        lowest_accept = 0.6  # never accept anything be low this
+        lowest_accept = 0.65  # never accept anything be low this
         lowering_of_standards_point = 0.9 # when do we allow the time pressure to start to affect our choice
 
         if bid is None:
@@ -250,7 +250,7 @@ class k9Agent(DefaultParty):
                     opponent_score = self.opponent_model.get_predicted_utility(bid)  # what we think they will get
 
                 # safety factor
-                if bid_score - opponent_score > 0.05:
+                if bid_score - opponent_score > 0:
                     if opponent_score > best_opponent_score:
                         best_opponent_score = opponent_score
                         best_bid = bid
