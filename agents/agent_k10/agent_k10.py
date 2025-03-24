@@ -2,6 +2,7 @@ import logging
 from random import randint
 from time import time
 from typing import cast
+from decimal import Decimal
 
 from geniusweb.actions.Accept import Accept
 from geniusweb.actions.Action import Action
@@ -30,7 +31,7 @@ from tudelft_utilities_logging.ReportToLogger import ReportToLogger
 from .utils.opponent_model import OpponentModel
 
 
-class TemplateAgent(DefaultParty):
+class Agentk10(DefaultParty):
     """
     Template of a Python geniusweb agent.
     """
@@ -187,36 +188,58 @@ class TemplateAgent(DefaultParty):
     ################################## Example methods below ##################################
     ###########################################################################################
 
+    def dynamic_target(self) -> float:
+        progress = self.progress.get(time() * 1000)
+
+        # Pick target based on time left.
+        target = 0.95 - (0.95 - 0.75) * (progress ** 2)
+
+        if self.last_received_bid is not None:
+            opp_util = self.profile.getUtility(self.last_received_bid)
+            if opp_util < target:
+                #  If the last bid was smaller than the target then increse by 0.02
+                target = opp_util + Decimal("0.02")
+        return target
+
     def accept_condition(self, bid: Bid) -> bool:
         if bid is None:
             return False
 
         # progress of the negotiation session between 0 and 1 (1 is deadline)
         progress = self.progress.get(time() * 1000)
+        current_utility = self.profile.getUtility(bid)
 
-        # very basic approach that accepts if the offer is valued above 0.7 and
-        # 95% of the time towards the deadline has passed
-        conditions = [
-            self.profile.getUtility(bid) > 0.8,
-            progress > 0.95,
-        ]
-        return all(conditions)
+        # Accept if utility is higher than the target.
+        if current_utility >= self.dynamic_target():
+            return True
+
+        # If we are reaching the end accept anything above 0.75
+        if progress > 0.98 and current_utility >= 0.75:
+            return True
+        return False
 
     def find_bid(self) -> Bid:
         # compose a list of all possible bids
         domain = self.profile.getDomain()
         all_bids = AllBidsList(domain)
-
-        best_bid_score = 0.0
+        best_bid_score = -1
         best_bid = None
+        target = self.dynamic_target()
 
-        # take 500 attempts to find a bid according to a heuristic score
         for _ in range(500):
             bid = all_bids.get(randint(0, all_bids.size() - 1))
+            if self.profile.getUtility(bid) < target:
+                continue
             bid_score = self.score_bid(bid)
             if bid_score > best_bid_score:
                 best_bid_score, best_bid = bid_score, bid
-
+        if best_bid is None:
+            # Fallback: choose highest scoring bid even if target isn't met.
+            for _ in range(500):
+                bid = all_bids.get(randint(0, all_bids.size() - 1))
+                bid_score = self.score_bid(bid)
+                if bid_score > best_bid_score:
+                    best_bid_score, best_bid = bid_score, bid
         return best_bid
 
     def score_bid(self, bid: Bid, alpha: float = 0.95, eps: float = 0.1) -> float:

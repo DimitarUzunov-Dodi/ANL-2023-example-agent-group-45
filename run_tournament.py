@@ -18,6 +18,10 @@ if not RESULTS_DIR.exists():
 tournament_settings = {
     "agents": [
         {
+            "class": "agents.agent_k10.agent_k10.Agentk10",
+            "parameters": {"storage_dir": "agent_storage/TemplateAgent"},
+        }
+        ,{
             "class": "agents.agent_k9.agent_k9.k9Agent",
             "parameters": {"storage_dir": "agent_storage/TemplateAgent"},
         },
