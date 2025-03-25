@@ -197,8 +197,6 @@ class k11Agent(DefaultParty):
         if bid is None:
             return False
 
-        # progress of the negotiation session between 0 and 1 (1 is deadline)
-        progress = self.progress.get(time() * 1000)
 
         if self.last_score != None: 
             if self.profile.getUtility(bid) > self.last_score :
@@ -212,7 +210,6 @@ class k11Agent(DefaultParty):
         conditions = [
             self.profile.getUtility(bid) > self.treshhold,
         ]
-        print(self.treshhold)
         return all(conditions)
 
     def find_bid(self) -> Bid:
@@ -221,7 +218,6 @@ class k11Agent(DefaultParty):
         all_bids = AllBidsList(domain)
 
         best_bid_score = 0.0
-        best_bid = None
         
         if self.bid  is None:
             # take 500 attempts to find a bid according to a heuristic score
@@ -230,8 +226,7 @@ class k11Agent(DefaultParty):
                 bid_score = self.score_bid(bid)
                 if bid_score > best_bid_score:
                     self.bid = bid
-                    best_bid_score, best_bid = bid_score, bid
-            print(best_bid_score)
+                    best_bid_score = bid_score
         return self.bid
 
     def score_bid(self, bid: Bid, alpha: float = 0.95, eps: float = 0.1) -> float:
