@@ -21,31 +21,43 @@ tournament_settings = {
             "class": "agents.agent_k10.agent_k10.Agentk10",
             "parameters": {"storage_dir": "agent_storage/TemplateAgent"},
         }
-        ,{
+        , {
             "class": "agents.agent_k11.agent_k11.k11Agent",
+            "parameters": {"storage_dir": "agent_storage/TemplateAgent"},
+        },
+        {
+            "class": "agents.agent_k9_base_version.agent_k9.k9Agent_base_version",
+            "parameters": {"storage_dir": "agent_storage/TemplateAgent"},
+        },
+        {
+            "class": "agents.agent_k9_kostas.agent_k9.k9Agent_kostas",
+            "parameters": {"storage_dir": "agent_storage/TemplateAgent"},
+        },
+        {
+            "class": "agents.agent_k9_mark2.agent_k9.k9Agent_version2_teun",
             "parameters": {"storage_dir": "agent_storage/TemplateAgent"},
         },
         {
             "class": "agents.boulware_agent.boulware_agent.BoulwareAgent",
         },
-        {
-            "class": "agents.conceder_agent.conceder_agent.ConcederAgent",
-        },
-        {
-            "class": "agents.hardliner_agent.hardliner_agent.HardlinerAgent",
-        },
-        {
-            "class": "agents.linear_agent.linear_agent.LinearAgent",
-        },
-        {
-            "class": "agents.random_agent.random_agent.RandomAgent",
-        },
-        {
-            "class": "agents.stupid_agent.stupid_agent.StupidAgent",
-        },
-        {
-            "class": "agents.CSE3210.agent2.agent2.Agent2",
-        },
+        # {
+        #     "class": "agents.conceder_agent.conceder_agent.ConcederAgent",
+        # },
+        # {
+        #     "class": "agents.hardliner_agent.hardliner_agent.HardlinerAgent",
+        # },
+        # {
+        #     "class": "agents.linear_agent.linear_agent.LinearAgent",
+        # },
+        # {
+        #     "class": "agents.random_agent.random_agent.RandomAgent",
+        # },
+        # {
+        #     "class": "agents.stupid_agent.stupid_agent.StupidAgent",
+        # },
+        # {
+        #     "class": "agents.CSE3210.agent2.agent2.Agent2",
+        # },
         # {
         #     "class": "agents.CSE3210.agent3.agent3.Agent3",
         # },

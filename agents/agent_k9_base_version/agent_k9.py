@@ -30,7 +30,7 @@ from tudelft_utilities_logging.ReportToLogger import ReportToLogger
 from .utils.opponent_model import OpponentModel
 
 
-class k9Agent(DefaultParty):
+class k9Agent_base_version(DefaultParty):
     """
     Template of a Python geniusweb agent.
     """
