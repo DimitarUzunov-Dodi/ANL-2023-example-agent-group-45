@@ -206,6 +206,67 @@ class k9Agent(DefaultParty):
         ]
         return all(conditions)
 
+    def boulware(self, all_bids) -> Bid:
+        best_bid_score = 0.0
+        best_bid = None
+
+        # take 500 attempts to find a bid according to a heuristic score
+        for _ in range(500):
+            bid = all_bids.get(randint(0, all_bids.size() - 1))
+            bid_score = self.score_bid(bid)
+            if bid_score > best_bid_score:
+                best_bid_score, best_bid = bid_score, bid
+        return best_bid
+    
+    def conceder(self, all_bids) -> Bid:
+        # We are going to look at what the other agent wants
+        best_opponent_score = 0.0
+        best_bid = None
+
+        for _ in range(10000):
+            bid = all_bids.get(randint(0, all_bids.size() - 1)) # get random bid
+            bid_score = self.score_bid(bid) # our score
+
+            opponent_score = 0
+            if self.opponent_model is not None:
+                opponent_score = self.opponent_model.get_predicted_utility(bid) # what we think they will get
+
+
+            # safety factor
+            if bid_score - opponent_score > 0.01:
+                if opponent_score > best_opponent_score:
+                    best_opponent_score = opponent_score
+                    best_bid = bid
+
+        return best_bid
+
+    def tradeOff(self, all_bids) -> Bid:
+        u_target = 0.9
+        if self.last_received_bid:
+            u_target = self.profile.getUtility(self.last_received_bid)
+        
+        difference_margin = 0.015
+        best_opponent_score = -1.0
+        best_bid = None
+
+        for _ in range (5000):
+            bid = all_bids.get(randint(0, all_bids.size() - 1))
+            bid_score = self.score_bid(bid)
+            if abs(bid_score - float(u_target)) < difference_margin:
+                opponent_score = 0
+                if self.opponent_model is not None:
+                    opponent_score = self.opponent_model.get_predicted_utility(bid)
+                if opponent_score > best_opponent_score:
+                    best_opponent_score = opponent_score
+                    best_bid = bid
+
+        # Worst-case if no bid is found return Conceder tactic
+        if best_bid is None:
+            return self.conceder()
+        else:
+            return best_bid
+
+
     def find_bid(self) -> Bid:
         # compose a list of all possible bids
         domain = self.profile.getDomain()
@@ -216,38 +277,11 @@ class k9Agent(DefaultParty):
 
         # first have of the game we are going to just think about what we want
         if progress < 0.5:
-            best_bid_score = 0.0
-            best_bid = None
-
-            # take 500 attempts to find a bid according to a heuristic score
-            for _ in range(500):
-                bid = all_bids.get(randint(0, all_bids.size() - 1))
-                bid_score = self.score_bid(bid)
-                if bid_score > best_bid_score:
-                    best_bid_score, best_bid = bid_score, bid
-            return best_bid
+            return self.boulware(all_bids)
+        elif progress < 0.8:
+            return self.tradeOff(all_bids)
         else:
-            # We are going to look at what the other agent wants
-            best_opponent_score = 0.0
-            best_bid = None
-
-            for _ in range(10000):
-                bid = all_bids.get(randint(0, all_bids.size() - 1)) # get random bid
-                bid_score = self.score_bid(bid) # our score
-
-                opponent_score = 0
-                if self.opponent_model is not None:
-                    opponent_score = self.opponent_model.get_predicted_utility(bid) # what we think they will get
-
-
-                # safety factor
-                if bid_score - opponent_score > 0.01:
-                    if opponent_score > best_opponent_score:
-                        best_opponent_score = opponent_score
-                        best_bid = bid
-
-            return best_bid
-
+            return self.conceder(all_bids)
 
 
 
