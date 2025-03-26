@@ -22,7 +22,7 @@ tournament_settings = {
             "parameters": {"storage_dir": "agent_storage/TemplateAgent"},
         }
         ,{
-            "class": "agents.agent_k9.agent_k9.k9Agent",
+            "class": "agents.agent_k11.agent_k11.k11Agent",
             "parameters": {"storage_dir": "agent_storage/TemplateAgent"},
         },
         {
